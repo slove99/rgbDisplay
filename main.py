@@ -33,26 +33,21 @@ def displayThread():
 #         Number of rows to display at a time
 #         Scrolling style for each row
 
-def dataStructureThread():
+def dataStructure():
     scrollStyle = []
     stringArray = []
-    stringArray
-    n = 3
-    m = 4
-    a = [[0] * m for i in range(n)]
-    while 1:
-        # Extract music data into the specified format and explain how to present it
-        if(mode == 2):
-            if(musicClass.nowPlaying != [] and musicClass.nowPlaying != None):
-                stringArray.append([musicClass.nowPlaying.title])
-                stringArray.append([musicClass.nowPlaying.get_artist().get_name()])
-                scrollStyle.append(SCROLL_REVERSE)
-                scrollStyle.append(SCROLL_REVERSE)
+    # Extract music data into the specified format and explain how to present it
+    if(mode == 2):
+        if(musicClass.nowPlaying != [] and musicClass.nowPlaying != None):
+            stringArray.append([musicClass.nowPlaying.title])
+            stringArray.append([musicClass.nowPlaying.get_artist().get_name()])
+            scrollStyle.append(SCROLL_REVERSE)
+            scrollStyle.append(SCROLL_REVERSE)
 
-        if(mode == 1):
-            scrollStyle.append(SCROLL_FULL)
-            stringArray.append(newsClass.descriptions)
-
+    if(mode == 1):
+        scrollStyle.append(SCROLL_FULL)
+        stringArray.append(newsClass.descriptions)
+    return stringArray, scrollStyle
 
 # Should specify how data should be displayed 2 col or 1 col, static, scroll full or scroll stop, or scroll back and forth
 # Scroll mode:
@@ -60,7 +55,23 @@ def dataStructureThread():
     #Scroll and stop at end and reset
     # Scroll stop at end and go back
     # No scroll
-#def driveDisplay(rows, scrollmode): # Should probably center by default if scrolling is set to static and center y wrt font size and row height
+def driveDisplayThread(): # Should probably center by default if scrolling is set to static and center y wrt font size and row height
+    while(1):
+        print("Running")
+        stringArray, scrollStyle = dataStructure()
+        if(len(scrollStyle)) == 1:
+            font = "big"
+        else:
+            font = "small"
+
+        for i in range(len(stringArray)): # For each row
+            # Perform scroll specific transformations
+            for j in range(len(stringArray[i])):
+                print(stringArray[i][j]) # For each element in each row
+            print("\n")
+        time.sleep(3)
+
+
 
 
 if __name__ == '__main__':
@@ -69,7 +80,7 @@ if __name__ == '__main__':
     n = threading.Thread(target=newsThread)
     s = threading.Thread(target=displayThread)
     m = threading.Thread(target=musicThread)
-    d = threading.Thread(target=dataStructureThread)
+    d = threading.Thread(target=driveDisplayThread)
 
     n.start()
     s.start()
