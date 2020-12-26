@@ -1,5 +1,6 @@
 import pylast
 class Music:
+    nowPlaying = [] # Store the currently playing song
     def __init__(self):
         credFile = open('cred.txt', 'r')
         self.username = next(credFile)[:-1]
@@ -13,3 +14,6 @@ class Music:
 
     def getCurrentSong(self):
         return (self.user.get_now_playing())
+
+    def updateAttributes(self):
+        self.nowPlaying = self.getCurrentSong()
