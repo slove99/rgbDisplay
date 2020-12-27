@@ -2,6 +2,9 @@ import time
 from Music import Music
 from News import News
 import threading
+
+from runtext import RunText
+
 mode = 0
 
 SCROLL_STATIC = 0
@@ -9,6 +12,16 @@ SCROLL_FULL = 1
 SCROLL_REVERSE = 2
 SCROLL_STOP = 3
 BORDER_COLOUR = 0
+
+DISPLAY_HEIGHT = 16
+DISPLAY_WIDTH = 32
+global updateDisplay
+
+global stringArray
+global scrollStyle
+global fontColour
+
+updateDisplay = False
 
 
 def newsThread():
@@ -35,6 +48,7 @@ def displayThread():
 
 def dataStructure():
     scrollStyle = []
+    fontColour = []
     stringArray = []
     # Extract music data into the specified format and explain how to present it
     if(mode == 2):
@@ -43,11 +57,14 @@ def dataStructure():
             stringArray.append([musicClass.nowPlaying.get_artist().get_name()])
             scrollStyle.append(SCROLL_REVERSE)
             scrollStyle.append(SCROLL_REVERSE)
+            fontColour.append(graphics.Color(255, 255, 0))
+            fontColour.append(graphics.Color(0, 255, 0))
 
     if(mode == 1):
         scrollStyle.append(SCROLL_FULL)
-        stringArray.append(newsClass.descriptions)
-    return stringArray, scrollStyle
+        stringArray.append(newsClass.descriptions[0:5])
+        fontColour.append(graphics.Color(255, 255, 255))
+    return stringArray, scrollStyle, fontColour
 
 # Should specify how data should be displayed 2 col or 1 col, static, scroll full or scroll stop, or scroll back and forth
 # Scroll mode:
@@ -55,36 +72,79 @@ def dataStructure():
     #Scroll and stop at end and reset
     # Scroll stop at end and go back
     # No scroll
-def driveDisplayThread(): # Should probably center by default if scrolling is set to static and center y wrt font size and row height
+def displayUpdaterThread(): # Should probably center by default if scrolling is set to static and center y wrt font size and row height
+    global updateDisplay
+    global stringArray
+    global scrollStyle
+    global fontColour
     while(1):
         print("Running")
-        stringArray, scrollStyle = dataStructure()
-        if(len(scrollStyle)) == 1:
-            font = "big"
-        else:
-            font = "small"
+        stringArrayNew, scrollStyle, fontColour = dataStructure()
+        if stringArrayNew != stringArray:
+            updateDisplay = True
+            stringArray = stringArrayNew
 
-        for i in range(len(stringArray)): # For each row
+        time.sleep(1)
+
+def displayControllerThread():
+    global stringArray
+    global scrollStyle
+    global fontColour
+    offset = 0
+    offscreen_canvas = self.matrix.CreateFrameCanvas()
+    pos = offscreen_canvas.width
+    font = graphics.Font()
+    while 1:
+        if(updateDisplay == True):
+            if(len(stringArray) == 2):
+                font.LoadFont("../../../fonts/4x6.bdf")
+                offset = [2, 12]
+            if(len(stringArray) == 1):
+                font.LoadFont("../../../fonts/9x15.bdf")
+                offset = [6]
+
+        for i in range(len(stringArray)):  # For each row
             # Perform scroll specific transformations
-            for j in range(len(stringArray[i])):
-                print(stringArray[i][j]) # For each element in each row
-            print("\n")
-        time.sleep(3)
+            len = graphics.DrawText(offscreen_canvas, font, pos, offset[i], fontColour[i], stringArray[i])
+        pos -= 1
+        if (pos + len < 0):
+            pos = offscreen_canvas.width
+        time.sleep(0.05)
+        offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 
+
+
+
+    textColor = graphics.Color(255, 255, 0)
+    pos = offscreen_canvas.width
+    my_text = self.args.text
+
+    while True:
+        offscreen_canvas.Clear()
+        len = graphics.DrawText(offscreen_canvas, font, pos, 10, textColor, my_text)
+        pos -= 1
+        if (pos + len < 0):
+            pos = offscreen_canvas.width
+
+        time.sleep(0.05)
+        offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 
 if __name__ == '__main__':
     musicClass = Music()
     newsClass = News()
+    scrollerClass = RunText()
     n = threading.Thread(target=newsThread)
     s = threading.Thread(target=displayThread)
     m = threading.Thread(target=musicThread)
-    d = threading.Thread(target=driveDisplayThread)
+    d = threading.Thread(target=displayUpdaterThread)
+    c = threading.Thread(target=displayControllerThread)
 
     n.start()
     s.start()
     m.start()
     d.start()
+    c.start()
     while 1:
         mode = int(input("Enter mode"))
