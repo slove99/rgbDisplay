@@ -37,4 +37,5 @@ class News:
         self.newsType = newType
 
     def updateAttributes(self):
+        print("Updating news headlines")
         self.headlines, self.descriptions = self.getNews()

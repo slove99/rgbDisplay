@@ -5,7 +5,8 @@ import threading
 
 from runtext import RunText
 
-mode = 0
+from samplebase import SampleBase
+from rgbmatrix import graphics
 
 SCROLL_STATIC = 0
 SCROLL_FULL = 1
@@ -15,30 +16,31 @@ BORDER_COLOUR = 0
 
 DISPLAY_HEIGHT = 16
 DISPLAY_WIDTH = 32
-global updateDisplay
 
+global mode
+global updateDisplay
+mode = 2
 global stringArray
 global scrollStyle
 global fontColour
-
+stringArray = []
 updateDisplay = False
 
 
 def newsThread():
+    global mode
     while 1:
         if(mode == 1):
+            print("Mode is 1")
             newsClass.updateAttributes()
-            time.sleep(2)
+            time.sleep(10)
 
 def musicThread():
+    global mode
     while 1:
         if(mode == 2):
             musicClass.updateAttributes()
-            time.sleep(1)
-
-def displayThread():
-    while 1:
-        time.sleep(1)
+            time.sleep(10)
 
 # Function used to extract meaningful data to be displayed on the screen as well as information on how to display it
 # INPUT: N/A
@@ -47,9 +49,12 @@ def displayThread():
 #         Scrolling style for each row
 
 def dataStructure():
+    global stringArray
+    global mode
     scrollStyle = []
     fontColour = []
     stringArray = []
+    scrollStyle = []
     # Extract music data into the specified format and explain how to present it
     if(mode == 2):
         if(musicClass.nowPlaying != [] and musicClass.nowPlaying != None):
@@ -62,7 +67,7 @@ def dataStructure():
 
     if(mode == 1):
         scrollStyle.append(SCROLL_FULL)
-        stringArray.append(newsClass.descriptions[0:5])
+        stringArray.append(newsClass.descriptions[0:2])
         fontColour.append(graphics.Color(255, 255, 255))
     return stringArray, scrollStyle, fontColour
 
@@ -78,73 +83,73 @@ def displayUpdaterThread(): # Should probably center by default if scrolling is 
     global scrollStyle
     global fontColour
     while(1):
-        print("Running")
+        #print("Running")
         stringArrayNew, scrollStyle, fontColour = dataStructure()
+        print(stringArrayNew)
         if stringArrayNew != stringArray:
             updateDisplay = True
             stringArray = stringArrayNew
-
         time.sleep(1)
 
 def displayControllerThread():
     global stringArray
     global scrollStyle
     global fontColour
-    offset = 0
-    offscreen_canvas = self.matrix.CreateFrameCanvas()
-    pos = offscreen_canvas.width
-    font = graphics.Font()
-    while 1:
-        if(updateDisplay == True):
-            if(len(stringArray) == 2):
-                font.LoadFont("../../../fonts/4x6.bdf")
-                offset = [2, 12]
-            if(len(stringArray) == 1):
-                font.LoadFont("../../../fonts/9x15.bdf")
-                offset = [6]
+    #offset = 0
+    #offscreen_canvas = self.matrix.CreateFrameCanvas()
+    #pos = offscreen_canvas.width
+    #font = graphics.Font()
+    scrollerClass = RunText(graphics.Color(0, 255, 0))
+    scrollerClass.process()
+    #while 1:
+    #    if(updateDisplay == True):
+    #        if(len(stringArray) == 2):
+    #            font.LoadFont("../../../fonts/4x6.bdf")
+    #            offset = [2, 12]
+    #        if(len(stringArray) == 1):
+    #            font.LoadFont("../../../fonts/9x15.bdf")
+    #            offset = [6]
 
-        for i in range(len(stringArray)):  # For each row
-            # Perform scroll specific transformations
-            len = graphics.DrawText(offscreen_canvas, font, pos, offset[i], fontColour[i], stringArray[i])
-        pos -= 1
-        if (pos + len < 0):
-            pos = offscreen_canvas.width
-        time.sleep(0.05)
-        offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
+    #    for i in range(len(stringArray)):  # For each row
+    #        # Perform scroll specific transformations
+    #        len = graphics.DrawText(offscreen_canvas, font, pos, offset[i], fontColour[i], stringArray[i])
+    #    pos -= 1
+    #    if (pos + len < 0):
+    #        pos = offscreen_canvas.width
+    #    time.sleep(0.05)
+    #    offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 
 
 
 
-    textColor = graphics.Color(255, 255, 0)
-    pos = offscreen_canvas.width
-    my_text = self.args.text
+    #textColor = graphics.Color(255, 255, 0)
+    #pos = offscreen_canvas.width
+    #my_text = self.args.text
 
-    while True:
-        offscreen_canvas.Clear()
-        len = graphics.DrawText(offscreen_canvas, font, pos, 10, textColor, my_text)
-        pos -= 1
-        if (pos + len < 0):
-            pos = offscreen_canvas.width
+    #while True:
+    #    offscreen_canvas.Clear()
+    #    len = graphics.DrawText(offscreen_canvas, font, pos, 10, textColor, my_text)
+    #    pos -= 1
+    #    if (pos + len < 0):
+    #        pos = offscreen_canvas.width
 
-        time.sleep(0.05)
-        offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
+    #    time.sleep(0.05)
+    #    offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
 
 
 if __name__ == '__main__':
     musicClass = Music()
     newsClass = News()
-    scrollerClass = RunText()
+    #scrollerClass = RunText(graphics.Color(0, 255, 0))
     n = threading.Thread(target=newsThread)
-    s = threading.Thread(target=displayThread)
     m = threading.Thread(target=musicThread)
     d = threading.Thread(target=displayUpdaterThread)
     c = threading.Thread(target=displayControllerThread)
 
     n.start()
-    s.start()
     m.start()
     d.start()
     c.start()
     while 1:
-        mode = int(input("Enter mode"))
+        mode = 2 #int(input("Enter mode"))
