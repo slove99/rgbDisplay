@@ -86,9 +86,12 @@ def displayUpdaterThread(): # Should probably center by default if scrolling is 
         #print("Running")
         stringArrayNew, scrollStyle, fontColour = dataStructure()
         print(stringArrayNew)
+        if(stringArray != []):
+            scrollerClass.stringArray = stringArray
         if stringArrayNew != stringArray:
             updateDisplay = True
             stringArray = stringArrayNew
+            scrollerClass.stringArray = stringArray
         time.sleep(1)
 
 def displayControllerThread():
@@ -99,7 +102,6 @@ def displayControllerThread():
     #offscreen_canvas = self.matrix.CreateFrameCanvas()
     #pos = offscreen_canvas.width
     #font = graphics.Font()
-    scrollerClass = RunText(graphics.Color(0, 255, 0))
     scrollerClass.process()
     #while 1:
     #    if(updateDisplay == True):
@@ -141,7 +143,7 @@ def displayControllerThread():
 if __name__ == '__main__':
     musicClass = Music()
     newsClass = News()
-    #scrollerClass = RunText(graphics.Color(0, 255, 0))
+    scrollerClass = RunText(graphics.Color(0, 255, 0))
     n = threading.Thread(target=newsThread)
     m = threading.Thread(target=musicThread)
     d = threading.Thread(target=displayUpdaterThread)
@@ -152,4 +154,4 @@ if __name__ == '__main__':
     d.start()
     c.start()
     while 1:
-        mode = 2 #int(input("Enter mode"))
+        mode = 1 #int(input("Enter mode"))
