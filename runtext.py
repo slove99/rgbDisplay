@@ -14,7 +14,7 @@ class RunText(SampleBase):
                 self.scrollStyle = []
                 self.fontColor = []
                 self.offset = 0
-                self.mode = NEWS
+                self.mode = MUSIC
                 self.updateDisplay = False
 
         def drawBorder(self, offscreen_canvas, borderColor, rows, cols):
@@ -25,24 +25,20 @@ class RunText(SampleBase):
 
 
         def run(self):
-            #if (self.updateDisplay == True):
-            #    if (len(self.stringArray) == 2):
-            #       font.LoadFont("../../../fonts/4x6.bdf")
-            #        offset = [2, 12]
-            #    if (len(self.stringArray) == 1):
-            #        font.LoadFont("../../../fonts/9x15.bdf")
-            #        offset = [6]
                 offscreen_canvas = self.matrix.CreateFrameCanvas()
                 fontMusic = graphics.Font()
                 fontNews = graphics.Font()
                 fontClock = graphics.Font()
                 fontMusic.LoadFont("../../../../fonts/6x10.bdf")
                 fontNews.LoadFont("../../../../fonts/7x14.bdf")
+                fontClock.LoadFont("../../../../fonts/6x12.bdf")
                 textColor = graphics.Color(0, 0, 255)
                 textColor2 = graphics.Color(0, 255, 0)
                 colorNews = graphics.Color(255, 0, 0)
+                colorClock = graphics.Color(0, 255, 0)
                 borderNews = graphics.Color(0,0,255)
                 borderColor = graphics.Color(0, 255, 0)
+                borderClock = graphics.Color(0, 0, 255)
                 pos1 = offscreen_canvas.width
                 pos2 = offscreen_canvas.width
                 timestamp = ""
@@ -67,10 +63,20 @@ class RunText(SampleBase):
                                 offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
                         while(self.mode == NEWS):
                                 offscreen_canvas.Clear()
-                                len = graphics.DrawText(offscreen_canvas, fontNews, pos1, 12, colorNews, "         ".join(self.stringArray[0]))
+                                len1 = graphics.DrawText(offscreen_canvas, fontNews, pos1, 12, colorNews, "         ".join(self.stringArray[0]))
                                 self.drawBorder(offscreen_canvas, borderNews, rows-1, cols-1)
                                 pos1 -= 1 # Careful
-                                if (pos1 + len < 0):
+                                if (pos1 + len1 < 0):
                                          pos1 = offscreen_canvas.width
                                 time.sleep(0.04)
                                 offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
+                        while(self.mode == CLOCK):
+                                while (time.strftime('%H:%M') != timestamp):
+                                         timestamp = time.strftime('%H:%M')
+                                         print(timestamp)
+                                         offscreen_canvas.Clear()
+                                         pos = 1
+                                         self.drawBorder(offscreen_canvas, borderClock, rows-1, cols-1)
+                                         len1 = graphics.DrawText(offscreen_canvas, fontClock, pos, 11, colorClock, timestamp[0:5])
+                                         offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
+

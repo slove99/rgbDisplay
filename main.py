@@ -30,8 +30,8 @@ updateDisplay = False
 def newsThread():
     global mode
     while 1:
-        if(mode == 1):
-            print("Mode is 1")
+        if(mode == 3):
+            print("Mode is 3")
             newsClass.updateAttributes()
             time.sleep(10)
 
@@ -65,7 +65,7 @@ def dataStructure():
             fontColour.append(graphics.Color(255, 255, 0))
             fontColour.append(graphics.Color(0, 255, 0))
 
-    if(mode == 1):
+    if(mode == 3):
         scrollStyle.append(SCROLL_FULL)
         stringArray.append(newsClass.descriptions[0:2])
         fontColour.append(graphics.Color(255, 255, 255))
@@ -85,7 +85,6 @@ def displayUpdaterThread(): # Should probably center by default if scrolling is 
     while(1):
         #print("Running")
         stringArrayNew, scrollStyle, fontColour = dataStructure()
-        print(stringArrayNew)
         if(stringArray != []):
             scrollerClass.stringArray = stringArray
         if stringArrayNew != stringArray:
@@ -154,4 +153,4 @@ if __name__ == '__main__':
     d.start()
     c.start()
     while 1:
-        mode = 1 #int(input("Enter mode"))
+        mode = 2 #int(input("Enter mode"))

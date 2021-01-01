@@ -16,7 +16,15 @@ class News:
                "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"]
 
     def getNews(self):
-        resp = requests.get(self.url[self.newsType])
+        resp = []
+        while True:
+            try:
+                resp = requests.get(self.url[self.newsType])
+                break
+            except: #requests.exceptions.Timeout:
+                print("News connection error")
+                time.sleep(5)
+                pass
         soup = BeautifulSoup(resp.content, features="xml")
         soup.prettify()
         soup.find_all(["a", "b"])
@@ -26,6 +34,7 @@ class News:
         for items in item:
             newsHeadlines.append(items.title.text)
             newsDescriptions.append(items.description.text)
+        print(newsHeadlines)
         return newsHeadlines, newsDescriptions
 
     def printNewsheadlines(self):

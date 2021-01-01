@@ -8,8 +8,14 @@ class Music:
         credAPIKey = next(credFile)[:-1]
         credAPISec = next(credFile)
         credPwdHash = pylast.md5(credPwd)
-        self.network = pylast.LastFMNetwork(api_key=credAPIKey, api_secret=credAPISec,
+        while 1:
+               try:
+                   self.network = pylast.LastFMNetwork(api_key=credAPIKey, api_secret=credAPISec,
                                        username=self.username, password_hash=credPwdHash)
+                   break
+               except pylast.WSError:
+                   print("Error creating self.network")
+                   pass
         self.user = pylast.User(self.username, self.network)
 
     def getCurrentSong(self):
