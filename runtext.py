@@ -6,6 +6,7 @@ import time
 CLOCK = 1
 MUSIC = 2
 NEWS = 3
+OFF = 0
 class RunText(SampleBase):
         def __init__(self, borderColor,  *args, **kwargs):
                 super(RunText, self).__init__(*args, **kwargs)
@@ -14,7 +15,7 @@ class RunText(SampleBase):
                 self.scrollStyle = []
                 self.fontColor = []
                 self.offset = 0
-                self.mode = MUSIC
+                self.mode = OFF
                 self.updateDisplay = False
 
         def drawBorder(self, offscreen_canvas, borderColor, rows, cols):
@@ -79,4 +80,4 @@ class RunText(SampleBase):
                                          self.drawBorder(offscreen_canvas, borderClock, rows-1, cols-1)
                                          len1 = graphics.DrawText(offscreen_canvas, fontClock, pos, 11, colorClock, timestamp[0:5])
                                          offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
-
+                        offscreen_canvas.Clear()

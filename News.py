@@ -34,7 +34,6 @@ class News:
         for items in item:
             newsHeadlines.append(items.title.text)
             newsDescriptions.append(items.description.text)
-        print(newsHeadlines)
         return newsHeadlines, newsDescriptions
 
     def printNewsheadlines(self):
