@@ -2,8 +2,6 @@
 
 Created using commit 9f5ffd8 from https://github.com/hzeller/rpi-rgb-led-matrix
 
-This repo will be combined with  the original rpi-rgb-led-matrix library for ease of install
-
 **Supported information types:**
 
  Music
@@ -25,6 +23,8 @@ Clock
 **To fix:**
 
 * Neaten timing code for schedulerThread to allow fast customisation
+* Combine with  the original rpi-rgb-led-matrix library for ease of install
+
 
 **To add:**
 
