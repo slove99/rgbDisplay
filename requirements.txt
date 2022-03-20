@@ -1,0 +1,15 @@
+beautifulsoup4==4.10.0
+bs4==0.0.1
+certifi==2021.10.8
+charset-normalizer==2.0.12
+idna==3.3
+importlib-metadata==4.11.3
+Pillow==9.0.1
+pkg-resources==0.0.0
+pylast==4.5.0
+requests==2.27.1
+rgbmatrix==0.0.1
+soupsieve==2.3.1
+typing-extensions==4.1.1
+urllib3==1.26.9
+zipp==3.7.0
