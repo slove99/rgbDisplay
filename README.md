@@ -17,11 +17,13 @@
 <code>git clone https://github.com/hzeller/rpi-rgb-led-matrix </code> 
 * Follow instructions on [rpi-rgb-led-matrix/bindings/python](https://github.com/hzeller/rpi-rgb-led-matrix/tree/master/bindings/python)  to build python with required arguments:
 	- Currently this involves running these commands within your <code>rpi-rgb-led-matrix</code> folder: 
+
+		> If using a virtual envionment, ensure python3 is pointing to the correct location (run <code>which 
+		> python3</code> and check the path points to 
+		> <code><path_to_venv_folder><venv_name>/bin/python3</code>)
 		- <code>make build-python PYTHON=$(command -v python3)</code> 
 		- <code>sudo make install-python PYTHON=$(command -v python3)</code>
-	> If using a virtual envionment, ensure python3 is pointing to the correct location (run <code>which 
-	> python3</code> and check the path points to 
-	> <code><path_to_venv_folder><venv_name>/bin/python3</code>)
+		
 * Clone this repo: <code>git clone https://github.com/slove99/rgbDisplay</code> 
 * Install python requirements: <code> pip install -r requirements.txt </code> 
 * Run <code>main.py</code> and supply 
