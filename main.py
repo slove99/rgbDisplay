@@ -1,3 +1,4 @@
+
 import time
 from datetime import datetime, time as t
 from Music import Music
@@ -34,7 +35,7 @@ def newsThread():
         if(scrollerClass.mode == 3):
             print("Mode is 3")
             newsClass.updateAttributes()
-            time.sleep(10)
+            time.sleep(50)
 
 def musicThread():
     global mode
@@ -102,6 +103,7 @@ def betweenTime(startTime, endTime, curTime=None):
 
 # Responsible for controlling what state the display should operate in
 def schedulerThread():
+    print("In schedulerThread")
     modeOFF = 0
     modeMIX = 1
     modeCLOCK = 2
@@ -125,7 +127,7 @@ def schedulerThread():
                 scrollerClass.mode = 1
             if(mode == modeMIX):
                 print("In mode MIX")
-                if( (curMins >= 0 and curMins <= 15) or (curMins >= 30 and curMins <= 35) ):
+                if( (curMins >= 0 and curMins <= 15) or (curMins >= 30 and curMins <= 50) ):
                     print("Showing news")
                     scrollerClass.mode = 3
                 elif (musicClass.nowPlaying != [] and musicClass.nowPlaying != None):
@@ -144,47 +146,7 @@ def displayControllerThread():
     global stringArray
     global scrollStyle
     global fontColour
-    #offset = 0
-    #offscreen_canvas = self.matrix.CreateFrameCanvas()
-    #pos = offscreen_canvas.width
-    #font = graphics.Font()
     scrollerClass.process()
-    #while 1:
-    #    if(updateDisplay == True):
-    #        if(len(stringArray) == 2):
-    #            font.LoadFont("../../../fonts/4x6.bdf")
-    #            offset = [2, 12]
-    #        if(len(stringArray) == 1):
-    #            font.LoadFont("../../../fonts/9x15.bdf")
-    #            offset = [6]
-
-    #    for i in range(len(stringArray)):  # For each row
-    #        # Perform scroll specific transformations
-    #        len = graphics.DrawText(offscreen_canvas, font, pos, offset[i], fontColour[i], stringArray[i])
-    #    pos -= 1
-    #    if (pos + len < 0):
-    #        pos = offscreen_canvas.width
-    #    time.sleep(0.05)
-    #    offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
-
-
-
-
-
-    #textColor = graphics.Color(255, 255, 0)
-    #pos = offscreen_canvas.width
-    #my_text = self.args.text
-
-    #while True:
-    #    offscreen_canvas.Clear()
-    #    len = graphics.DrawText(offscreen_canvas, font, pos, 10, textColor, my_text)
-    #    pos -= 1
-    #    if (pos + len < 0):
-    #        pos = offscreen_canvas.width
-
-    #    time.sleep(0.05)
-    #    offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
-
 
 if __name__ == '__main__':
     musicClass = Music()
