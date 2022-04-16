@@ -1,5 +1,8 @@
 import pylast
-class Music:
+import requests
+
+
+class LastFM_Music:
     nowPlaying = [] # Store the currently playing song
     def __init__(self):
         credFile = open('cred.txt', 'r')
@@ -23,3 +26,18 @@ class Music:
 
     def updateAttributes(self):
         self.nowPlaying = self.getCurrentSong()
+
+
+class Volumio_Music:
+    api_url = "http://192.168.1.169/api/v1/getState"
+    def __init__(self):
+        self.data = []
+
+
+    def getVolumioState(self):
+        return self.data
+
+
+    def updateAttributes(self):
+        self.data = requests.get(self.api_url).json()
+        
