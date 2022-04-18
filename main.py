@@ -1,6 +1,7 @@
 import time
 import threading
 from datetime import datetime, time as t
+import numpy as np
 
 from Display_Enums import Operation
 from Panel_Writer import Panel_Writer
@@ -9,18 +10,10 @@ from Music import Volumio_Music
 from News import News
 
 
-
-SCROLL_STATIC = 0
-SCROLL_FULL = 1
-SCROLL_REVERSE = 2
-SCROLL_STOP = 3
-BORDER_COLOUR = 0
-
 global mode
 global updateDisplay
 mode = Operation.CLOCK
 global stringArray
-global scrollStyle
 global fontColour
 stringArray = []
 updateDisplay = False
@@ -29,73 +22,20 @@ updateDisplay = False
 def newsThread():
     global mode
     while 1:
-        if panelClass.mode == 3:
-            print("Mode is 3")
+        if panelClass.mode == Operation.NEWS:
+            print("Mode is News")
             newsClass.updateAttributes()
-            time.sleep(50)
+            time.sleep(15)
 
 def musicThread():
     global mode
     while 1:
-        if panelClass.mode == 2:
-            musicClass.getVolumioState()
-            time.sleep(10)
+        if panelClass.mode == Operation.MUSIC:
+            musicClass.updateAttributes()
+            time.sleep(3)
         else:
             musicClass.updateAttributes()
-            time.sleep(20)
-
-# Function used to extract meaningful data to be displayed on the screen as well
-# as information on how to display it
-# INPUT: N/A
-# OUTPUT: A  nested list of string arrays containing information to be displayed
-# - an array for each row?
-#         Number of rows to display at a time
-#         Scrolling style for each row
-
-def dataStructure():
-    global stringArray
-    global mode
-    scrollStyle = []
-    fontColour = []
-    stringArray = []
-    scrollStyle = []
-    # Extract music data into the specified format and explain how to present it
-    if panelClass.mode == Operation.MUSIC:
-        if musicClass.data != []:
-            if musicClass.data["status"] == "play":
-                stringArray.append([musicClass.data["title"].upper()])
-                stringArray.append([musicClass.data["artist"].upper()])
-                scrollStyle.append(SCROLL_REVERSE)
-                scrollStyle.append(SCROLL_REVERSE)
-                fontColour.append(graphics.Color(255, 255, 0))
-                fontColour.append(graphics.Color(0, 255, 0))
-            else:
-                stringArray = ""
-
-
-    if panelClass.mode == Operation.NEWS:
-        scrollStyle.append(SCROLL_FULL)
-        stringArray.append(newsClass.descriptions[0:2])
-        fontColour.append(graphics.Color(255, 255, 255))
-    return stringArray, scrollStyle, fontColour
-
-# Responsible for updating the string data to be sent to the display
-def displayUpdaterThread(): 
-    # Should probably center by default if scrolling is 
-    # set to static and center y wrt font size and row height
-    global updateDisplay
-    global stringArray
-    global scrollStyle
-    global fontColour
-    while 1:
-        stringArrayNew, scrollStyle, fontColour = dataStructure()
-        if stringArray != []:
-            panelClass.stringArray = stringArray
-        if stringArrayNew != stringArray:
-            updateDisplay = True
-            stringArray = stringArrayNew
-            panelClass.stringArray = stringArray
-        time.sleep(1)
+            time.sleep(10)
 
 
 def betweenTime(startTime, endTime, curTime=None):
@@ -154,23 +94,22 @@ def schedulerThread():
 
 def displayControllerThread():
     global stringArray
-    global scrollStyle
     global fontColour
     panelClass.process()
 
 if __name__ == '__main__':
     panelClass = Panel_Writer(graphics.Color(0, 255, 0))
     musicClass = Volumio_Music()
+    panelClass.musicClass = musicClass
     newsClass = News()
+    panelClass.newsClass = newsClass
     n = threading.Thread(target=newsThread)
     m = threading.Thread(target=musicThread)
-    d = threading.Thread(target=displayUpdaterThread)
     c = threading.Thread(target=displayControllerThread)
     s = threading.Thread(target=schedulerThread)
 
     n.start()
     m.start()
-    d.start()
     c.start()
     s.start()
 

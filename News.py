@@ -3,9 +3,6 @@ from bs4 import BeautifulSoup
 
 
 class News:
-    headlines = []
-    descriptions = []
-    newsType = 0
     def __init__(self):
         self.url = ["http://feeds.bbci.co.uk/news/rss.xml", "http://feeds.bbci.co.uk/news/world/rss.xml",
                "http://feeds.bbci.co.uk/news/uk/rss.xml", "http://feeds.bbci.co.uk/news/business/rss.xml",
@@ -14,6 +11,9 @@ class News:
                "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
                "http://feeds.bbci.co.uk/news/technology/rss.xml",
                "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"]
+        self.headlines = ["Headline"]
+        self.descriptions = ["Description"]
+        self.newsType = 0
 
     def getNews(self):
         resp = []
@@ -45,5 +45,4 @@ class News:
         self.newsType = newType
 
     def updateAttributes(self):
-        print("Updating news headlines")
         self.headlines, self.descriptions = self.getNews()

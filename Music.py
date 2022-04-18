@@ -1,5 +1,6 @@
 import pylast
 import requests
+import numpy as np
 
 
 class LastFM_Music:
@@ -31,7 +32,7 @@ class LastFM_Music:
 class Volumio_Music:
     api_url = "http://192.168.1.169/api/v1/getState"
     def __init__(self):
-        self.data = []
+        self.data = None
 
 
     def getVolumioState(self):
@@ -39,5 +40,14 @@ class Volumio_Music:
 
 
     def updateAttributes(self):
-        self.data = requests.get(self.api_url).json()
+        try:
+            self.data = requests.get(self.api_url).json()
+        except requests.exceptions.RequestException as e:
+            print("Voluimio connection error")
+
+
+    def getVolumioArt(self, x, y):
+        url = request.get(self.data["albumart"])
+        with Image.open(BytesIO(response.content)) as im:
+            self.art = im.resize((x, y))
         

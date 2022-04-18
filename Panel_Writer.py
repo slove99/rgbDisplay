@@ -1,6 +1,7 @@
 import time
 import argparse
 import sys
+import numpy as np
 
 from Display_Enums import Operation, Dimensions
 from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
@@ -32,14 +33,16 @@ class Panel_Writer():
         self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
         self.args = self.parser.parse_args()
 
-        self.stringArray = [["test"], ["song"]]
-        self.scrollStyle = []
+        self.stringArray = [[""], [""]]
+        #self.artwork = 
         self.fontColour = []
         self.offset = 0
         self.graphicLength = []
         self.scrollIdxs = []
         self.mode = Operation.OFF
         self.updateDisplay = False
+        self.musicClass = None
+        self.newsClass = None
 
 
 
@@ -76,43 +79,72 @@ class Panel_Writer():
 
 
     def drawBorder(self, canvas, borderColour, rows, cols):
-        b = graphics.DrawLine(canvas, 0, 0, 0, rows, borderColour)
-        b = graphics.DrawLine(canvas, 0, rows, cols, rows, borderColour)
-        b = graphics.DrawLine(canvas, cols, rows, cols, 0, borderColour)
-        b = graphics.DrawLine(canvas, 0, 0, cols, 0, borderColour)
+        graphics.DrawLine(canvas, 0, 0, 0, rows, borderColour)
+        graphics.DrawLine(canvas, 0, rows, cols, rows, borderColour)
+        graphics.DrawLine(canvas, cols, rows, cols, 0, borderColour)
+        graphics.DrawLine(canvas, 0, 0, cols, 0, borderColour)
+        return canvas
 
     def scrollStep(self, canvas, interval=None, intervalRatio=1, lrRatio=1.3):
-        # Ignore scroll if len < disp
-        # If len < 1.3x disp len then scroll lrlr
+        interval *= 1e9      
+        for i, gLen in enumerate(self.graphicLength):
+            if gLen < canvas.width:
+                self.scrollIdxs[i] = 0
+                continue
 
 
-        if interval is None:
-            for i, gLen in enumerate(self.graphicLength):
-                self.scrollIdxs[i] -= 1
+            if gLen < lrRatio * canvas.width:
+                if (self.scrollIdxs[i] == canvas.width - gLen and
+                 (self.scrollDirs[i][0]) != 1):
+                    # Reached end of scroll
+                    self.scrollDirs[i][0] = 1
+                    self.scrollDirs[i][1] = 0
+                    self.scrollDirs[i][2] = time.time_ns()
+
+                elif (self.scrollIdxs[i] == 0 and
+                 (self.scrollDirs[i][0]) != -1):
+                    # At start of scroll
+                    self.scrollDirs[i][0] = -1
+                    self.scrollDirs[i][1] = 0
+                    self.scrollDirs[i][2] = time.time_ns()
+
+                if (time.time_ns() - self.scrollDirs[i][2]) > 1e9:
+                    self.scrollDirs[i][1] = self.scrollDirs[i][0]
+
+
+            if interval is not None:
+                curTime = time.time_ns()
+                if curTime - self.timeDeltas[i] > interval * (intervalRatio ** i):
+                    self.scrollIdxs[i] += self.scrollDirs[i][1]
+                    self.timeDeltas[i] = curTime
+            
+            else:
+                self.scrollIdxs[i] += self.scrollDirs[i][1]
+
+            if gLen >= lrRatio * canvas.width:
                 if self.scrollIdxs[i] + gLen < 0:
                     self.scrollIdxs[i] = canvas.width
-            return
-
-        # Variable scrolling speeds per line
-        interval *= 1e9
-        for i, gLen in enumerate(self.graphicLength):
-            curTime = time.time_ns()
-            if curTime - self.timeDeltas[i] > interval * (intervalRatio ** i):
-                self.scrollIdxs[i] -= 1
-                self.timeDeltas[i] = curTime
-            if self.scrollIdxs[i] + gLen < 0:
-                self.scrollIdxs[i] = canvas.width
 
 
     def multiLine(self, canvas, numLines, font, colour, 
         height=Dimensions.DISPLAY_HEIGHT):
+        self.graphicLength = []
         if numLines != 0:
             step = height // numLines
             for i in range(numLines):
                 self.graphicLength.append(graphics.DrawText(
                     canvas, font, self.scrollIdxs[i], step * (i + 1) - 1,
-                    colour, self.stringArray[i][0]))
+                    colour, self.stringArray[i][0])) #
         return canvas
+
+
+    #def drawArt(self, canvas, )
+
+    def setGraphArray(self):
+        ns_start = time.time_ns()
+        self.scrollIdxs = [0 for i in self.stringArray]
+        self.scrollDirs = [[1, -1, ns_start] for i in self.stringArray]
+        self.timeDeltas = [ns_start for i in self.stringArray]
 
 
     def run(self):
@@ -120,7 +152,7 @@ class Panel_Writer():
         fontMusic = graphics.Font()
         fontNews = graphics.Font()
         fontClock = graphics.Font()
-        fontMusic.LoadFont("fonts/5x8.bdf")
+        fontMusic.LoadFont("fonts/6x10.bdf")
         fontNews.LoadFont("fonts/7x14.bdf")
         fontClock.LoadFont("fonts/6x12.bdf")
         textColour = graphics.Color(0, 0, 255)
@@ -134,7 +166,9 @@ class Panel_Writer():
         pos1 = canvas.width
         pos2 = canvas.width
         self.scrollIdxs = []
+        self.scrollDirs = []
         self.timeDeltas = []
+        prevStringArray = []
 
 
         timestamp = ""
@@ -142,29 +176,41 @@ class Panel_Writer():
         rows = self.matrix.height
         cols = self.matrix.width
         while 1:
+            curTime = time.time_ns()
             while self.mode == Operation.MUSIC:
-                if len(self.scrollIdxs) != len(self.stringArray):
-                    ns_start = time.time_ns()
-                    self.scrollIdxs = [canvas.width for i in self.stringArray]
-                    self.timeDeltas = [ns_start for i in self.stringArray]
-                self.graphicLength = []
+
+                if self.musicClass.data is None:
+                    continue
+
+                if (time.time_ns() - curTime > 1e9) or self.scrollIdxs == []:
+                    curTime = time.time_ns()
+                    if (self.musicClass.data["title"].upper() != self.stringArray[0][0] and
+                        self.musicClass.data["artist"].upper() != self.stringArray[1][0]):
+                        self.stringArray = ([[self.musicClass.data["title"].upper()],
+                            [self.musicClass.data["artist"].upper()]])
+                        self.setGraphArray()
+
                 canvas.Clear()
                 canvas = self.multiLine(canvas, len(self.stringArray), 
                     fontMusic, textColour)
-                self.scrollStep(canvas, 0.03, 1.3)
-                self.drawBorder(canvas, borderMusic, rows-1, cols-1)
-                #time.sleep(0.04)
+                self.scrollStep(canvas, 0.02, 1.3)
+                #canvas = self.drawBorder(canvas, borderMusic, rows-1, cols-1)
                 canvas = self.matrix.SwapOnVSync(canvas)
 
             while self.mode == Operation.NEWS:
+                if self.newsClass.headlines is None:
+                    continue
+
+                if (time.time_ns() - curTime > 5e9) or self.scrollIdxs == []:
+                    if ["      ".join(self.newsClass.headlines)] != self.stringArray[0]:
+                        self.stringArray = [["      ".join(self.newsClass.headlines)],
+                            ["      ".join(self.newsClass.headlines)]]
+                        self.setGraphArray()
+
                 canvas.Clear()
-                len1 = graphics.DrawText(canvas, fontNews, pos1, 12, colourNews,
-                    "         ".join(self.stringArray[0]))
+                canvas = self.multiLine(canvas, 1, fontNews, colourNews)
+                self.scrollStep(canvas, 0.01, 1.3)
                 self.drawBorder(canvas, borderNews, rows-1, cols-1)
-                pos1 -= 1 # Careful
-                if pos1 + len1 < 0:
-                    pos1 = canvas.width
-                time.sleep(0.04)
                 canvas = self.matrix.SwapOnVSync(canvas)
 
             while self.mode == Operation.CLOCK:
